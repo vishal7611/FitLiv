@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "143009365371",
+    "project_id": "fit-posture-app",
+    "storage_bucket": "fit-posture-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:143009365371:android:289bb1f53ca5587d0d91de",
+        "android_client_info": {
+          "package_name": "com.example.fit_posture_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbCBZ8Rf6dcY5SD5uK_h1PttgyWWwJLlo"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
