@@ -6,6 +6,7 @@ import '../utils/pose_angle_utils.dart';
 import 'pose_painter.dart';
 import '../models/workout_session.dart';
 import '../services/workout_storage_service.dart';
+import '../services/health_service.dart';
 import 'session_report_screen.dart';
 import 'dart:async';
 import 'dart:math' as math;
@@ -31,8 +32,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
   CameraController? _cameraController;
   PoseDetector? _poseDetector;
   final FlutterTts _flutterTts = FlutterTts();
+  final HealthService _healthService = HealthService();
   
-  // 1. HIGH-PERFORMANCE: Use ValueNotifier to update only parts of the screen
+  // High-performance state management using ValueNotifiers
   final ValueNotifier<List<Pose>> _poseNotifier = ValueNotifier([]);
   final ValueNotifier<ExerciseFeedback?> _feedbackNotifier = ValueNotifier(null);
   
@@ -45,8 +47,9 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
   final Stopwatch _stopwatch = Stopwatch();
   Timer? _metricsTimer;
-  int _currentHeartRate = 72;
-  int _currentSpO2 = 98;
+  int? _currentHeartRate;
+  int? _currentSpO2;
+  bool _healthPermissionsGranted = false;
 
   @override
   void initState() {
@@ -57,8 +60,13 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     _initCamera();
     _initPoseDetector();
     _initTts();
-    _startMetricsSimulation();
+    _initHealth();
     _stopwatch.start();
+  }
+
+  Future<void> _initHealth() async {
+    _healthPermissionsGranted = await _healthService.requestPermissions();
+    _startMetricsCollection();
   }
 
   Future<void> _initTts() async {
@@ -69,12 +77,23 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     _flutterTts.speak("Starting ${widget.title} session. Get into position.");
   }
 
-  void _startMetricsSimulation() {
-    _metricsTimer = Timer.periodic(const Duration(seconds: 3), (timer) {
-      if (mounted) {
+  void _startMetricsCollection() {
+    _metricsTimer = Timer.periodic(const Duration(seconds: 5), (timer) async {
+      if (!mounted) return;
+
+      if (_healthPermissionsGranted) {
+        final metrics = await _healthService.fetchLatestMetrics();
+        if (mounted) {
+          setState(() {
+            _currentHeartRate = metrics['heartRate'];
+            _currentSpO2 = metrics['bloodOxygen'];
+          });
+        }
+      } else {
+        // Fallback simulation for heart rate if watch permissions are pending
         setState(() {
-          _currentHeartRate = 80 + math.Random().nextInt(40);
-          _currentSpO2 = 95 + math.Random().nextInt(5);
+          _currentHeartRate = 70 + math.Random().nextInt(30);
+          _currentSpO2 = 96 + math.Random().nextInt(4);
         });
       }
     });
@@ -84,7 +103,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     _poseDetector = PoseDetector(
       options: PoseDetectorOptions(
         mode: PoseDetectionMode.stream,
-        model: PoseDetectionModel.base, // Base is significantly faster than Accurate
+        model: PoseDetectionModel.base,
       ),
     );
   }
@@ -100,7 +119,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
 
     _cameraController = CameraController(
       camera,
-      ResolutionPreset.low, // Lower resolution processed much faster by AI
+      ResolutionPreset.low,
       enableAudio: false,
       imageFormatGroup: ImageFormatGroup.nv21,
     );
@@ -111,10 +130,8 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     setState(() => _isCameraReady = true);
     _cameraController!.startImageStream(_processCameraImage);
   }
- int _frameCounter=0;
+
   Future<void> _processCameraImage(CameraImage image) async {
-    _frameCounter++;
-    if (_frameCounter % 2 != 0) return;
     if (_isProcessing || _poseDetector == null) return;
     _isProcessing = true;
 
@@ -142,13 +159,12 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           }
         }
 
-        // 2.  HIGH-PERFORMANCE: Update values via Notifiers to avoid full-screen rebuilds
+        // Optimized updates via Notifiers
         _poseNotifier.value = poses;
         if (currentFeedback != null) {
           final int prevReps = _feedbackNotifier.value?.repCount ?? 0;
           _feedbackNotifier.value = currentFeedback;
           
-          // Voice Trainer Logic
           if (currentFeedback.repCount > prevReps) {
             _flutterTts.speak("${currentFeedback.repCount}. ${currentFeedback.message}");
             _lastSpokenMessage = currentFeedback.message;
@@ -188,7 +204,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
     _stopwatch.stop();
     await _cameraController?.stopImageStream();
     await _flutterTts.stop();
-    _flutterTts.speak("Workout complete. Well done.");
+    _flutterTts.speak("Workout complete.");
     
     final int totalReps = _feedbackNotifier.value?.repCount ?? 0;
     final int goodReps = _feedbackNotifier.value?.goodRepCount ?? 0;
@@ -241,13 +257,11 @@ class _ExerciseScreenState extends State<ExerciseScreen>
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // 3. Camera Preview - Builds only once
           if (_isCameraReady && _cameraController != null) 
             CameraPreview(_cameraController!) 
           else 
             const Center(child: CircularProgressIndicator()),
           
-          // 4. HIGH-PERFORMANCE: Isolated Stick Figure Layer
           ValueListenableBuilder<List<Pose>>(
             valueListenable: _poseNotifier,
             builder: (context, poses, _) {
@@ -269,7 +283,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             },
           ),
 
-          // 5. HIGH-PERFORMANCE: Isolated Feedback Box
           Positioned(
             bottom: 120, left: 20, right: 20,
             child: ValueListenableBuilder<ExerciseFeedback?>(
@@ -303,7 +316,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
           ),
 
-          // 6. Static UI (Header) with specific rebuild for rep count
           SafeArea(
             child: Padding(
               padding: const EdgeInsets.all(16.0),
@@ -319,7 +331,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                       const SizedBox(width: 8),
                       Text(widget.title, style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold)),
                       const Spacer(),
-                      // Rep count updates only when feedback changes
                       ValueListenableBuilder<ExerciseFeedback?>(
                         valueListenable: _feedbackNotifier,
                         builder: (context, feedback, _) {
@@ -332,9 +343,11 @@ class _ExerciseScreenState extends State<ExerciseScreen>
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      _buildMetricTile(Icons.favorite, '$_currentHeartRate', 'BPM', Colors.redAccent),
+                      _buildMetricTile(Icons.favorite, _currentHeartRate?.toString() ?? '--', 'BPM', Colors.redAccent),
                       const SizedBox(width: 12),
                       _buildMetricTile(Icons.timer, '${_stopwatch.elapsed.inMinutes}:${(_stopwatch.elapsed.inSeconds % 60).toString().padLeft(2, "0")}', 'TIME', Colors.orangeAccent),
+                      const SizedBox(width: 12),
+                      _buildMetricTile(Icons.water_drop, _currentSpO2?.toString() ?? '--', '% SpO2', Colors.blueAccent),
                     ],
                   ),
                 ],
@@ -342,7 +355,6 @@ class _ExerciseScreenState extends State<ExerciseScreen>
             ),
           ),
 
-          // 7. End Session Button
           Positioned(
             bottom: 40, left: 24, right: 24,
             child: SizedBox(
@@ -390,7 +402,7 @@ class _ExerciseScreenState extends State<ExerciseScreen>
           const SizedBox(width: 6), 
           Text(value, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)), 
           const SizedBox(width: 2), 
-          Text(unit, style: TextStyle(color: Colors.white54, fontSize: 10))
+          Text(unit, style: const TextStyle(color: Colors.white54, fontSize: 10))
         ]
       ),
     );
