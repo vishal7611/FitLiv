@@ -1,7 +1,7 @@
 name: fit_posture_app
 description: AI Posture & Exercise Tracker using ML Kit Pose Detection
 publish_to: 'none'
-version: 1.0.0+1
+version: 2.0.0+99
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -14,7 +14,6 @@ dependencies:
   firebase_core: ^3.0.0
   firebase_auth: ^5.0.0
 
-
   # ML Kit Pose Detection
   google_mlkit_pose_detection: ^0.12.0
 
@@ -23,6 +22,10 @@ dependencies:
 
   # TTS
   flutter_tts: ^4.0.2
+
+  # Health & Smartwatch
+  health: ^11.0.0
+  permission_handler: ^11.3.1
 
   # UI
   cupertino_icons: ^1.0.6
