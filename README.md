@@ -1,4 +1,4 @@
-# fit_posture_app
+# FitLiv - a personal form detection and correction mobile application
 
 A new Flutter project.
 
