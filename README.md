@@ -1,15 +1,23 @@
 # FitLiv - AI based Fitness Form Detection and Correction Mobile Application
 
-## What is FitLiv
-###To design and develop an AI based fitness monitoring mobile application that assists physiotherapists in remotely monitoring patient exercises while providing patients with real time corrective feedback
+## What is FitLiv ?
+### To design and develop an AI based fitness monitoring mobile application that assists physiotherapists in remotely monitoring patient exercises while providing patients with real time corrective feedback
 
--To implement real time human pose estimation using mobile friendly AI models
--To analyze joint angles and range of motion for physiotherapy exercises
--To accurately count repetitions using algorithmic state based logic
--To provide instant feedback for incorrect posture or incomplete movements
--To enable data driven monitoring of patient progress by physiotherapists
+- To implement real time human pose estimation using mobile friendly AI models
+- To analyze joint angles and range of motion for physiotherapy exercises
+- To accurately count repetitions using algorithmic state based logic
+- To provide instant feedback for incorrect posture or incomplete movements
+- To enable data driven monitoring of patient progress by physiotherapists
 
+## Features 
+- Real time pose detection using camera
+- Real time on screen monitoring using messages and voice command
+- Gives a detail post workout data
+- Local Storage of data
+- Keeps records of past workouts
 
+## Images of the screens
+<img src="">
 
 ## Getting Started
 
