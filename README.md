@@ -17,7 +17,8 @@
 - Keeps records of past workouts
 
 ## Images of the screens
-<img src="">
+<img src="screenshorts/Login Screen.jpeg">
+
 
 ## Getting Started
 
