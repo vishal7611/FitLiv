@@ -71,8 +71,7 @@ The application processes data through four main stages, from collecting informa
 
 #### Camera Input
 
-*Location: health_service.dart → fetchLatestMetrics()*
-<a href="services/health_service.dart"/>
+[*Location: health_service.dart → fetchLatestMetrics()*](services/health_service.dart)
 
 - Starts the front camera.
 - Captures video at approximately 30 frames per second (FPS).
@@ -89,8 +88,9 @@ The application processes data through four main stages, from collecting informa
 
 ## 2. Data Pre-processing (Preparing the Data)
 
-*Location: exercise_screen.dart → _inputImageFromCameraImage()*
+[*Location: exercise_screen.dart → _inputImageFromCameraImage()*](screens/exercise_screen.dart)
 <a href="screens/exercise_screen.dart"/>
+
 
 ### Before analysis, the collected data is converted into a format the app can use.
 
@@ -102,8 +102,9 @@ The application processes data through four main stages, from collecting informa
 
 ### **Health Data Selection**
 
-*Location: health_service.dart → fetchLatestMetrics()*
+[*Location: health_service.dart → fetchLatestMetrics()*](services/health_services.dart)
 <a href="services/health_services.dart"/>
+services/health_services.dart
 
 Smartwatches often sync multiple records at once.
 The app looks back over the last 10 minutes.
@@ -115,8 +116,9 @@ This stage performs pose detection, angle calculation, and repetition counting.
 
 ### Pose Detection
 
-*Location: exercise_screen.dart → _processCameraImage()*
+[*Location: exercise_screen.dart → _processCameraImage()*](href="utils/pose_angle_utils.dart)
 <a href="utils/pose_angle_utils.dart"/>
+
 
 Sends the prepared image to Google ML Kit Pose Detector.
 The model detects 33 body landmarks representing different joints.
@@ -144,7 +146,7 @@ Exercise Analysis
 
 ### Once a workout session is complete, the results are saved locally.
 
-*Location: workout_session.dart → toMap()*
+[*Location: workout_session.dart → toMap()*](services/workout_storage_services.dart)
 <a href="services/workout_storage_services.dart"/>
 
 ### The app collects workout information such as:
