@@ -31,6 +31,7 @@
 <p align="center">
 <img src="screenshorts/Analysis screen.jpeg" width="320px">
 <img src="screenshorts/Performages log.jpeg" width="320px">
+<img src="screenshorts/630c13a50a24422ba23e0492d4789dba.gif" width="320px">
   
 </p>
 
